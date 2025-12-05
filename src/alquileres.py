@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from datetime import date, datetime
 from typing import NamedTuple
+import csv
 
 
 class Alquiler(NamedTuple):
@@ -22,18 +23,29 @@ def parse_fecha(cadena: str) -> date:
 
 
 def lee_alquileres(ruta: str) -> list[Alquiler]:
-    """Lee el CSV y devuelve una lista de Alquiler."""
-    raise NotImplementedError
+    alquileres=[]
+    with open (ruta, encoding='utf-8') as f:
+        lector=csv.reader(f)
+        next(lector)
+        for linea in lector:
+            nombre=linea[0]
+            dni=linea[1]
+            fecha_inicio=parse_fecha(linea[2])
+            fecha_fin=parse_fecha(linea[3])
+            estacion=linea[4]
+            bici_tipo=linea[5]
+            precio_dia=float(linea[6])
+            servicios=linea[7].split(',')
+            alquiler=Alquiler(nombre,dni,fecha_inicio,fecha_fin,estacion,bici_tipo,precio_dia,servicios)
+            alquileres.append(alquiler)
+    return alquileres
 
 
-def total_facturado(
-    alquileres: list[Alquiler],
-    fecha_ini: date | None = None,
-    fecha_fin: date | None = None,
-) -> float:
-    """Suma lo cobrado en el rango de fechas (fecha_inicio)."""
-    raise NotImplementedError
-
+def total_facturado(alquileres: list[Alquiler],fecha_ini: date | None = None,fecha_fin: date | None = None) -> float:
+    facturado=0
+    for alquiler in alquileres:
+        if alquiler.fecha_inicio<fecha_ini and alquiler.fecha_fin>fecha_fin or fecha_ini==None:
+            facturado+=alquiler.precio_dia*(alquiler.fecha_fin-fecha_ini)
 
 def alquileres_mas_largos(
     alquileres: list[Alquiler],
